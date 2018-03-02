@@ -3,6 +3,21 @@ const TaskManager = require('./taskmanager')
 
 const mgr = new TaskManager()
 
+if (app.get('env') === 'production') {
+  // trust first reverse proxy
+  app.set('trust proxy', 1)
+
+  // Enforce https
+  app.all('*', (req, res, next) => {
+    if (req.secure)
+      next()
+    else if (req.method === 'GET')
+      res.redirect(`https://${req.headers.host}${req.url}`)
+    else
+      res.status(401).send('Secure channel required - use https')
+  })
+}
+
 app.post('/tasks/:taskName/run', (req, res) => {
   const task = mgr.run(req.params.taskName)
   const link = `/tasks/${task.runId}/status`
@@ -34,4 +49,7 @@ app.post('/tasks/:runId/cancel', (req, res) => {
     res.json(mgr.status(req.params.runId))
 })
 
-app.listen(process.env.PORT || 3000)
+const port = process.env.PORT || 3000
+app.listen(port, () => {
+  console.log(`API started on port ${port}`)
+})

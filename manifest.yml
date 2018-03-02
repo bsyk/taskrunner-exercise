@@ -1,0 +1,9 @@
+applications:
+  - name: netflix
+    host: netflix
+    buildpack: https://github.com/cloudfoundry/nodejs-buildpack.git
+    memory: 128M
+    instances: 1
+    domain: bensykes.com
+    path: .
+    command: node .
