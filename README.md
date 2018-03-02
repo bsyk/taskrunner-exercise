@@ -4,12 +4,12 @@ This service provides an API to execute, monitor and cancel test suites containe
 
 ### Using The Service
 
-The service is provided as a cloud service and utilized an in-memory non-persistent store of results.  Subsequently, and restart of the service would reset the IDs and clear any previous results.
+The service is provided as a cloud service and utilizes an in-memory non-persistent store for results.  Subsequently, any restart of the service would reset the IDs and clear any previous results.
 To run a sample set of tasks, use the `runcloud.sh` bash script in the `tests` folder.
 
 The service exposes the following endpoints:
 
-#### `/tasks`
+#### GET `/tasks`
 This is a REST-style endpoint that returns the status of all tasks that have been submitted to the service.
 
 Sample CURL command:
@@ -46,7 +46,7 @@ Possible responses:
 | 404         | My server broke  | Try again?       |
 
 
-#### `/tasks/:taskName/run`
+#### POST `/tasks/:taskName/run`
 This is an RPC-style endpoint to submit a request to run the task named 'taskName' from the `simpletestrunner` module.  The response will include the runId and a URL to monitor the progress and retrieve the status and results.  The status URL will also be included in the `Link` header for easy access without having to parse the response body.
 
 Sample CURL command:
@@ -75,8 +75,8 @@ Possible responses:
 | 404  | My server broke       | Try again?       |
 
 
-#### `/tasks/:runId/status`
-This is a REST-style endpoint to query the status and results of a submitted task. The `runId` should be obtained from the response of the original request to run the task. The response will include the runId, taskName, current status, start/stop times, elapsed time in milliseconds and possibly a result if the task completed.  The elapsed time will be current while the task is still running and absolute once the task has completed.  In the event of a failure, there may be additional details included in the failures section, detailing out the testName, exception type and reason for failure.
+#### GET `/tasks/:runId/status`
+This is a REST-style endpoint to retrieve the status and results of a submitted task. The `runId` should be obtained from the response of the original request to run the task. The response will include the runId, taskName, current status, start/stop times, elapsed time in milliseconds and possibly a result if the task completed.  The elapsed time will be current while the task is still running and absolute once the task has completed.  In the event of a failure, there may be additional details included in the failures section, detailing out the testName, exception type and reason for each failure.
 
 Sample CURL command:
 ```
@@ -121,8 +121,8 @@ Possible responses:
 | 401  | https is needed       | Use https scheme |
 | 404  | That's not a valid `runId`| Use a `runId` from a run request |
 
-#### `/tasks/:runId/cancel`
-This is a RPC-style endpoint to cancel a running task. The `runId` should be obtained from the response of the original request to run the task.  The response will include the updated (or previous) status of the task.  Only running tasks can be canceled, an error will be returned in a finished task is attempted to be canceled.
+#### POST `/tasks/:runId/cancel`
+This is a RPC-style endpoint to cancel a running task. The `runId` should be obtained from the response of the original request to run the task.  The response will include the updated (or previous) status of the task.  Only running tasks can be canceled, an error will be returned if a finished task is attempted to be canceled.
 
 Sample CURL command:
 ```
