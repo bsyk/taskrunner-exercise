@@ -1,0 +1,28 @@
+{
+  "name": "taskrunner-exercise",
+  "version": "1.0.0",
+  "description": "For this exercise, you will implement a task dispatcher. The dispatcher will run as a service that allows the scheduling and monitoring of a set of tasks, and retrieval of their results.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bsyk/taskrunner-exercise.git"
+  },
+  "author": "Ben Sykes <ben@bensykes.com> (https://github.com/bsyk)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bsyk/taskrunner-exercise/issues"
+  },
+  "homepage": "https://github.com/bsyk/taskrunner-exercise#readme",
+  "dependencies": {
+    "express": "^4.16.2"
+  },
+  "devDependencies": {
+    "ajv": "^6.2.0",
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.18.1",
+    "eslint-config-netflix": "^2.0.0"
+  }
+}
