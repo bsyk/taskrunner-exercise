@@ -4,7 +4,8 @@ const RunHistory = require('./runhistory')
 const STATUS = Object.freeze({
   CREATED: 'CREATED',
   RUNNING: 'RUNNING',
-  COMPLETE: 'COMPLETE',
+  SUCCESS: 'SUCCESS',
+  FAILED: 'FAILED',
   ERROR: 'ERROR',
   CANCELED: 'CANCELED'
 })
@@ -37,9 +38,12 @@ module.exports = class TaskManager {
     job.then(result => {
       task.stopTime = Date.now()
       task.elapsedTimeMs = task.stopTime - task.startTime
-      task.status = STATUS.COMPLETE
-      task.stdout = result.stdout
-      task.stderr = result.stderr
+      if (result.failures.length !== 0 || result.failed > 0)
+        task.status = STATUS.FAILED
+      else
+        task.status =  STATUS.SUCCESS
+
+      task.result = result
       delete this.runningTasks[runId]
       console.log(`[Job ${runId}] Complete.`)
     }).catch(result => {
@@ -47,9 +51,7 @@ module.exports = class TaskManager {
         task.stopTime = Date.now()
         task.elapsedTimeMs = task.stopTime - task.startTime
         task.status = STATUS.ERROR
-        task.err = result.err
-        task.stdout = result.stdout
-        task.stderr = result.stderr
+        task.result = result
       }
       delete this.runningTasks[runId]
       console.log(`[Job ${runId}] Incomplete.`)
@@ -81,6 +83,7 @@ module.exports = class TaskManager {
     if (result) {
       console.log(`[Job ${result.runId}] Stop requested.`)
 
+      // Only allow stopping jobs form the CREATED or RUNNING phases
       if (result.status === STATUS.CREATED || result.status === STATUS.RUNNING) {
         // Job exists and is running
         const killed = this.proc.killTask(result.runId)

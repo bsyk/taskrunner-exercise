@@ -1,6 +1,14 @@
 const { fork } = require('child_process')
+const parse = require('./outputhandler')
 
 const SCRIPT_NAME = 'simpletestrunner'
+const UNKNOWN_TASK_OUTPUT = 'simpletestrunner: test suite \'testSuite\' not recongnized' // [sic]
+
+function isAppError(code, stdout, stderr) {
+  return code !== 0
+    || stdout.trim().length === 0 && stderr.trim().length > 0
+    || stdout.includes(UNKNOWN_TASK_OUTPUT)
+}
 
 module.exports = class ProcessHandler {
   constructor() {
@@ -29,17 +37,17 @@ module.exports = class ProcessHandler {
 
       job.on('exit', (code) => {
         console.log(`[Job ${task.runId}] Child exited with code ${code}`)
-        if (code === 0)
-          resolve({ stdout, stderr, code })
+        if (!isAppError(code, stdout, stderr))
+          resolve(parse(stdout, stderr))
         else
-          reject({ stdout, stderr, code })
+          reject(parse(stdout, stderr))
 
         delete this.runningProcesses[task.runId]
       })
 
       job.on('error', (err) => {
         console.log(`[Job ${task.runId}] Failed to start subprocess.`, err)
-        reject({ err, stdout, stderr, code: -1 })
+        reject(parse(stdout, stderr, err))
         delete this.runningProcesses[task.runId]
       })
     })
